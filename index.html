@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colour Me Curious! — 7-Minute Pair Game</title>
+<style>
+:root{--bg:#fffaf8;--ink:#292743;--muted:#6e6b82;--card:#fff;--pink:#ffe0eb;--blue:#e0edff;--yellow:#fff2c8;--purple:#eee5ff;--accent:#7055c7;--line:#e9e3ef}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(140deg,#fff0f5,#f2f0ff 55%,#eaf5ff);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);line-height:1.5}.wrap{max-width:850px;margin:auto;padding:18px}.hero,.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:clamp(20px,4vw,32px);box-shadow:0 12px 35px #30245b12}.hero{background:linear-gradient(120deg,#ffe1ec,#eee5ff,#e0efff);margin-bottom:16px}.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:.75rem;font-weight:850;color:#6954a4}.hero h1{font-size:clamp(2.2rem,7vw,3.7rem);line-height:1;margin:10px 0}.hero p{max-width:620px;color:#55516f}.meta{display:flex;gap:8px;flex-wrap:wrap}.pill{background:#ffffffc9;padding:6px 11px;border-radius:99px;font-size:.86rem;font-weight:700}.timerrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0}.timer{font-size:1.8rem;font-weight:900;font-variant-numeric:tabular-nums}.btn{border:0;border-radius:13px;padding:11px 15px;font-weight:800;cursor:pointer;font-size:.95rem}.primary{background:var(--accent);color:#fff}.soft{background:#f0ebfa;color:#514572}.rounds{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}.roundbtn{flex:1;min-width:125px;text-align:left;background:#fff;border:1px solid var(--line);color:var(--ink)}.roundbtn.active{border:2px solid var(--accent);background:#f3efff}.roundbtn small{display:block;color:var(--muted);font-weight:600}.card h2{font-size:clamp(1.5rem,4vw,2.1rem);line-height:1.1;margin:10px 0}.instruction{color:var(--muted);margin-top:0}.q{padding:15px 0;border-top:1px solid var(--line)}.q:first-of-type{border-top:0}.q h3{font-size:1.12rem;margin:0 0 10px}.choices{display:flex;gap:7px;flex-wrap:wrap}.choice{border:1px solid #ded6ed;background:#fff;color:var(--ink);border-radius:999px;padding:8px 12px;cursor:pointer}.choice.selected{background:var(--accent);color:#fff;border-color:var(--accent)}.talk{background:#fff3d4;padding:13px 15px;border-radius:15px;margin:16px 0}.bank{background:#eaf2ff;padding:14px 15px;border-radius:15px}.bank strong{display:block;margin-bottom:7px}.bank span{display:inline-block;background:#fff;border-radius:8px;padding:5px 8px;margin:3px;font-size:.88rem;font-weight:700}.foot{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:20px}.done{display:flex;align-items:center;gap:8px;margin-top:15px;font-weight:750}.done input{width:18px;height:18px}.note{font-size:.85rem;color:var(--muted);text-align:center;margin:15px 0}@media(max-width:520px){.timerrow{align-items:flex-start;flex-direction:column}.roundbtn{min-width:100%}}
+</style>
+</head>
+<body><main class="wrap">
+<header class="hero">
+<div class="eyebrow">B1 speaking · Pair warm-up</div>
+<h1>🌈 Colour Me Curious!</h1>
+<p>A quick 7-minute game to discover what you and your partner think, feel and have in common. No right or wrong answers — just explain your choices!</p>
+<div class="meta"><span class="pill">👯 Work in pairs</span><span class="pill">💬 Ask follow-up questions</span><span class="pill">⏱ 7 minutes</span></div>
+</header>
+<section class="card">
+<div class="timerrow"><div><div class="eyebrow">Your 7-minute challenge</div><div class="timer" id="timer">07:00</div></div><div><button class="btn primary" id="start">▶ Start timer</button> <button class="btn soft" id="reset">↻ Reset</button></div></div>
+<div class="eyebrow">Choose a round</div>
+<div class="rounds" id="rounds"></div>
+<div id="game"></div>
+</section>
+<p class="note">Teacher tip: Give each partner about 30 seconds per answer. Keep the conversation moving!</p>
+</main>
+<script>
+const data=[
+{title:"1. Colours & feelings",time:"2 minutes",desc:"Take turns choosing colours and explaining your associations.",qs:[
+{q:"Which colour reminds you of…",opts:["spring","summer","autumn","winter"],follow:"Why? How does it make you feel?"},
+{q:"Choose a colour for…",opts:["work","holiday","money","love"],follow:"Would your partner choose the same colour?"}],
+mission:"Try saying: “___ reminds me of ___ because…”"},
+{title:"2. Your style",time:"2 minutes",desc:"Choose quickly, then compare your answers.",qs:[
+{q:"What colour would you choose for…",opts:["smart shoes","a phone case","a bag","a car"],follow:"Why that colour? Would you ever choose something brighter?"},
+{q:"Which sounds more like you?",opts:["I love colourful clothes.","I usually wear neutral colours.","I like wearing one colour.","It depends on my mood."],follow:"What do your clothes say about your personality?"}],
+mission:"Try saying: “I'm interested in trying…” or “I'm tired of wearing…”"},
+{title:"3. Me & you",time:"3 minutes",desc:"Find out something new about each other.",qs:[
+{q:"Choose the sentence that fits you best.",opts:["I'm excited about trying new things.","I'm worried about making mistakes.","I'm keen on learning new skills.","I'm fond of quiet places."],follow:"Why? Can you give an example?"},
+{q:"Find one thing you agree or disagree on.",opts:["fashion","favourite colours","trying new things","personal style"],follow:"Ask: “What about you?” or “Have you always felt this way?”"}],
+mission:"Before you finish, name one thing you have in common and one difference."}
+];
+let round=0,seconds=420,interval=null,running=false;
+const $=id=>document.getElementById(id);
+function renderRounds(){$('rounds').innerHTML=data.map((r,i)=>`<button class="btn roundbtn ${i===round?'active':''}" data-round="${i}">${r.title}<small>${r.time}</small></button>`).join('');document.querySelectorAll('[data-round]').forEach(b=>b.onclick=()=>{round=+b.dataset.round;render()})}
+function render(){renderRounds();let r=data[round];$('game').innerHTML=`<div class="eyebrow">${r.time}</div><h2>${r.title}</h2><p class="instruction">${r.desc}</p>${r.qs.map((q,i)=>`<div class="q"><h3>${i+1}. ${q.q}</h3><div class="choices">${q.opts.map(o=>`<button class="choice">${o}</button>`).join('')}</div><p class="instruction">💬 Ask your partner: ${q.follow}</p></div>`).join('')}<div class="talk"><strong>🎯 Speaking mission</strong><br>${r.mission}</div><div class="bank"><strong>🧩 Phrase bank — use at least one!</strong><span>interested in + -ing</span><span>excited about + -ing</span><span>worried about + -ing</span><span>tired of + -ing</span><span>keen on + -ing</span><span>fond of + -ing</span><span>good at + -ing</span><span>afraid of + -ing</span></div><label class="done"><input type="checkbox" id="finished"> We discussed this round!</label><div class="foot"><button class="btn soft" id="prev" ${round===0?'disabled':''}>← Previous</button><button class="btn primary" id="next">${round===2?'Finish game':'Next round →'}</button></div>`;document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>b.classList.toggle('selected'));$('prev').onclick=()=>{if(round>0){round--;render()}};$('next').onclick=()=>{if(round<2){round++;render()}else{$('game').innerHTML=`<h2>🎉 Great investigating!</h2><p>Tell each other:</p><ul><li>One thing we have in common is…</li><li>One thing that surprised me was…</li><li>I'm interested in… / I'm keen on…</li></ul><p class="instruction">Keep chatting until the timer ends. Remember: explain why and ask follow-up questions!</p><button class="btn primary" id="back">Review rounds</button>`;$('back').onclick=()=>render()}}}
+function updateTimer(){$('timer').textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');if(seconds===0){clearInterval(interval);interval=null;running=false;$('start').textContent='✓ Time is up!';return}if(running)seconds--}
+$('start').onclick=()=>{if(running){clearInterval(interval);interval=null;running=false;$('start').textContent='▶ Resume timer'}else{if(seconds===0)seconds=420;running=true;$('start').textContent='Ⅱ Pause timer';interval=setInterval(updateTimer,1000)}};
+$('reset').onclick=()=>{clearInterval(interval);interval=null;running=false;seconds=420;updateTimer();$('start').textContent='▶ Start timer'};
+render();updateTimer();
+</script></body></html>
